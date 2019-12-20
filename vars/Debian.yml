@@ -1,0 +1,2 @@
+curses_package: libncurses-dev
+libevent_package: libevent-dev
