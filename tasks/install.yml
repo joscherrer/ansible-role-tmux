@@ -1,0 +1,24 @@
+- name: Downloading the latest version of tmux
+  unarchive:
+    src: "https://github.com/tmux/tmux/releases/download/{{ tmux_git_version }}/tmux-{{ tmux_git_version }}.tar.gz"
+    dest: /opt/
+    remote_src: yes
+  become: yes
+
+- name: Configuring tmux
+  become: yes
+  shell: ./configure --prefix=/usr
+  args:
+    chdir: "/opt/tmux-{{ tmux_git_version }}"
+
+- name: Making tmux
+  become: yes
+  make:
+    chdir: "/opt/tmux-{{ tmux_git_version }}"
+    target: all
+
+- name: Installing tmux
+  become: yes
+  make: 
+    chdir: "/opt/tmux-{{ tmux_git_version }}"
+    target: install

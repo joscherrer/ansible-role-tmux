@@ -5,58 +5,61 @@
   include_vars: "{{ ansible_os_family }}.yml"
 
 - name: Installing ncurses
+  become: yes
   package:
     name: "{{ curses_package }}"
     state: present
 
 - name: Installing libevent
+  become: yes
   package:
     name: "{{ libevent_package }}"
     state: present
 
 
-# - name: Getting latest zsh version
-#   shell: git ls-remote --tags git://git.code.sf.net/p/zsh/code | sed 's/.*\///' | egrep "^zsh-[0-9]*\.[0-9]*(\.[0-9]*)?$" | sort | tail -n1 | sed 's/zsh-//'
-#   register: zsh_git
-#   changed_when: false
+- name: Getting latest tmux version
+  shell: git ls-remote --tags https://github.com/tmux/tmux.git | sed 's/.*\///' | egrep "^[0-9]*(\.[0-9]*)?([a-z]?)$" | sort | tail -n1
+  register: tmux_git
+  changed_when: false
 
-# - name: Removing any zsh package
-#   package:
-#     name: zsh
-#     state: absent
+- name: Removing any tmux package
+  become: yes
+  package:
+    name: tmux
+    state: absent
 
-# - name: Checking if zsh is installed
-#   stat:
-#     path: /usr/bin/zsh
-#   register: zsh_installed
+- name: Checking if tmux is installed
+  stat:
+    path: /usr/bin/tmux
+  register: tmux_installed
 
-# - name: Getting current zsh version
-#   shell: /usr/bin/zsh --version | egrep -o "[0-9]*\.[0-9]*(\.[0-9]*)?"
-#   when: zsh_installed.stat.exists
-#   register: zsh_local
-#   changed_when: false
+- name: Getting current tmux version
+  shell: /usr/bin/tmux -V | sed 's/tmux //'
+  when: tmux_installed.stat.exists
+  register: tmux_local
+  changed_when: false
 
-# - name: Set forced version
-#   set_fact:
-#     zsh_git_version: "{{ zsh_install_version }}"
-#   when: zsh_force_install | bool
+- name: Set forced version
+  set_fact:
+    tmux_git_version: "{{ tmux_install_version }}"
+  when: tmux_force_install | bool
 
-# - name: Set latest zsh version
-#   set_fact:
-#     zsh_git_version: "{{ zsh_git.stdout }}"
-#   when: not zsh_force_install
+- name: Set latest tmux version
+  set_fact:
+    tmux_git_version: "{{ tmux_git.stdout }}"
+  when: not tmux_force_install
 
-# - name: Set local zsh version
-#   set_fact:
-#     zsh_local_version: "{{ zsh_local.stdout }}"
-#   when: zsh_installed.stat.exists
+- name: Set local tmux version
+  set_fact:
+    tmux_local_version: "{{ tmux_local.stdout }}"
+  when: tmux_installed.stat.exists
 
-# - include_tasks: uninstall.yml
-#   when: 
-#     - zsh_installed.stat.exists 
-#     - (zsh_git_version != zsh_local_version) or zsh_force_install
+- include_tasks: uninstall.yml
+  when: 
+    - tmux_installed.stat.exists 
+    - (tmux_git_version != tmux_local_version) or tmux_force_install
 
-# - include_tasks: install.yml
-#   when: not zsh_installed.stat.exists or 
-#         zsh_force_install or 
-#         (zsh_git_version != zsh_local_version)
+- include_tasks: install.yml
+  when: not tmux_installed.stat.exists or 
+        tmux_force_install or 
+        (tmux_git_version != tmux_local_version)

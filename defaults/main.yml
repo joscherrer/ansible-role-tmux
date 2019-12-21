@@ -1,2 +1,5 @@
 ---
 # defaults file for ansible-role-tmux
+
+tmux_force_install: false
+tmux_install_version: "2.9"
