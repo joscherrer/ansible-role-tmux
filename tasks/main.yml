@@ -18,7 +18,9 @@
 
 
 - name: Getting latest tmux version
-  shell: git ls-remote --tags https://github.com/tmux/tmux.git | sed 's/.*\///' | egrep "^[0-9]*(\.[0-9]*)?([a-z]?)$" | sort | tail -n1
+  shell: | # noqa 303
+    set -o pipefail
+    git ls-remote --tags https://github.com/tmux/tmux.git | sed 's/.*\///' | egrep "^[0-9]*(\.[0-9]*)?([a-z]?)$" | sort | tail -n1
   register: tmux_git
   changed_when: false
 
@@ -34,7 +36,9 @@
   register: tmux_installed
 
 - name: Getting current tmux version
-  shell: /usr/bin/tmux -V | sed 's/tmux //'
+  shell: |
+    set -o pipefail
+    /usr/bin/tmux -V | sed 's/tmux //'
   when: tmux_installed.stat.exists
   register: tmux_local
   changed_when: false
@@ -55,11 +59,11 @@
   when: tmux_installed.stat.exists
 
 - include_tasks: uninstall.yml
-  when: 
-    - tmux_installed.stat.exists 
+  when:
+    - tmux_installed.stat.exists
     - (tmux_git_version != tmux_local_version) or tmux_force_install
 
 - include_tasks: install.yml
-  when: not tmux_installed.stat.exists or 
-        tmux_force_install or 
+  when: not tmux_installed.stat.exists or
+        tmux_force_install or
         (tmux_git_version != tmux_local_version)

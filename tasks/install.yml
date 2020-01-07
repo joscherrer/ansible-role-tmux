@@ -7,7 +7,8 @@
 
 - name: Configuring tmux
   become: yes
-  shell: ./configure --prefix=/usr
+  command: ./configure --prefix=/usr
+  changed_when: false
   args:
     chdir: "/opt/tmux-{{ tmux_git_version }}"
 
@@ -19,6 +20,6 @@
 
 - name: Installing tmux
   become: yes
-  make: 
+  make:
     chdir: "/opt/tmux-{{ tmux_git_version }}"
     target: install
